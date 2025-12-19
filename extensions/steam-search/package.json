@@ -2,9 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "steam-search",
   "title": "Steam Search",
-  "description": "Search for games on Steam and view details",
+  "description": "Search for games on Steam",
   "icon": "extension-icon.png",
-  "author": "Fitzypopper",
+  "author": "fitzypopper",
   "license": "MIT",
   "categories": [
     "Data",

@@ -8,6 +8,10 @@ interface SteamSearchItem {
   price?: { final: number };
 }
 
+interface SteamSearchResponse {
+  items: SteamSearchItem[];
+}
+
 interface SteamAppDetails {
   [key: string]: {
     success: boolean;
@@ -39,8 +43,7 @@ export default function Command() {
         const response = await fetch(
           `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(searchText)}&l=english&cc=US`,
         );
-        const data = (await response.json()) as { items: SteamSearchItem[] };
-
+        const data = (await response.json()) as SteamSearchResponse;
         if (data && data.items) {
           setItems(
             data.items.map((item) => ({
@@ -64,7 +67,7 @@ export default function Command() {
     <Grid
       isLoading={isLoading}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search Steam..."
+      searchBarPlaceholder="Search games on Steam..."
       throttle
       columns={3}
       aspectRatio="16/9"
@@ -73,7 +76,7 @@ export default function Command() {
       {items.map((item) => (
         <Grid.Item
           key={item.id}
-          content={{ value: item.image, fallback: Icon.GameController }}
+          content={{ source: item.image, fallback: Icon.GameController }}
           title={item.name}
           subtitle={item.price}
           actions={
@@ -106,12 +109,11 @@ function GameDetail({ appId, name, image, price }: { appId: string; name: string
       try {
         const response = await fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}`);
         const data = (await response.json()) as SteamAppDetails;
-
         if (data[appId]?.success) {
           const g = data[appId].data;
           setDetails({
             description: g.short_description?.replace(/<[^>]*>?/gm, "") || "",
-            reviews: g.recommendations?.total.toLocaleString() || "N/A",
+            reviews: g.recommendations ? `${g.recommendations.total.toLocaleString()}` : "N/A",
             developer: g.developers?.join(", ") || "N/A",
             releaseDate: g.release_date?.date || "TBA",
           });
@@ -128,7 +130,7 @@ function GameDetail({ appId, name, image, price }: { appId: string; name: string
   return (
     <Detail
       isLoading={loading}
-      markdown={`# ${name}\n![Header](${image})\n\n${details?.description}`}
+      markdown={`# ${name}\n![Header](${image})\n\n### Description\n${details?.description}`}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Price" text={price} />
